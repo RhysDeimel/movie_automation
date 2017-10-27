@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 import fabric
+import re
 
 
 def find_movies(html):
@@ -13,19 +14,28 @@ def find_movies(html):
 
 
 def get_title(match_obj):
-    pass
-
+    match = match_obj.find("a", class_="browse-movie-title")
+    return match.text
 
 def get_year(match_obj):
-    pass
+    match = match_obj.find("div", class_="browse-movie-year")
+    return match.text.strip()
 
 
 def get_category(match_obj):
-    pass
+    # <h4>Horror</h4>
+    match = match_obj.find("a", class_="browse-movie-title")
+    return match.text
 
 
 def get_rating(match_obj):
-    pass
+    # currently returning "7.3 / 10"
+    match = match_obj.find("h4", class_="rating")
+    pattern = re.compile("(\d.\d)|(\d?)")
+    result = pattern.match(match)
+    result.group()
+    ## finish regex here
+    return match.text
 
 
 def get_download(match_obj):

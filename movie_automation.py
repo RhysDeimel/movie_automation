@@ -13,46 +13,55 @@ def find_movies(html):
     return soup.find_all("div", class_="browse-movie-wrap")
 
 
-def get_title(match_obj):
-    match = match_obj.find("a", class_="browse-movie-title")
-    return match.text
-
-def get_year(match_obj):
-    match = match_obj.find("div", class_="browse-movie-year")
-    return match.text.strip()
+def get_title(movie_div):
+    title_elem = movie_div.find("a", class_="browse-movie-title")
+    return title_elem.text
 
 
-def get_category(match_obj):
+def get_year(movie_div):
+    year_elem = movie_div.find("div", class_="browse-movie-year")
+    return year_elem.text.strip()
+
+
+def get_category(movie_div):
+    def in_categories(tag):
+        categories = ["Family", "Crime", "Biography", "Comedy", "Drama", "Adult",
+                      "Horror", "Adventure", "War", "Sport", "Sci-Fi", "Short",
+                      "Animation", "Thriller", "Romance", "History", "Mystery",
+                      "Action", "Western", "Film-Noir", "Documentary", "Musical",
+                      "Music", "Fantasy"]
+        return tag.text in categories
     # <h4>Horror</h4>
-    match = match_obj.find("a", class_="browse-movie-title")
-    return match.text
+    category_elem = movie_div.find(in_categories)
+    return category_elem.text
 
 
-def get_rating(match_obj):
+def get_rating(movie_div):
     # currently returning "7.3 / 10"
-    match = match_obj.find("h4", class_="rating")
+    rating_elem = movie_div.find("h4", class_="rating")
     pattern = re.compile("(\d.\d)|(\d?)")
-    result = pattern.match(match)
-    result.group()
-    ## finish regex here
-    return match.text
+    re_result = pattern.match(rating_elem.text)
+    return re_result.group()
 
 
-def get_download(match_obj):
-    pass
+def get_download(movie_div):
+    def is_1080p(tag):
+        return tag.text == '1080p'
+    download_elem = movie_div.find(is_1080p)
+    return download_elem.get('href')
 
 
-def get_movie_details(match_obj):
+def get_movie_details(movie_div):
     """
     Given a match obj, will return a tuple of:
     (title, year, category, rating, download)
     """
     return (
-        get_title(match_obj),
-        get_year(match_obj),
-        get_category(match_obj),
-        get_rating(match_obj),
-        get_download(match_obj),
+        get_title(movie_div),
+        get_year(movie_div),
+        get_category(movie_div),
+        get_rating(movie_div),
+        get_download(movie_div),
     )
 
 
@@ -83,9 +92,9 @@ def html_stub_a():
     with open("tests/Page1.html") as f:
         return f.read()
 
-test = html_stub_a()
-test = find_movies(test)
-print(test[0])
+# test = html_stub_a()
+# test = find_movies(test)
+# print(get_rating(test[0]))
 
 
 # https://yts.gs/browse-movies/all/1080p/all/7/latest

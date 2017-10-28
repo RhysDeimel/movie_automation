@@ -38,35 +38,36 @@ def test_find_movies(html_stub_a):
     assert len(matches) == 20
 
 
-def test_get_title(match_obj_a):
+def test_get_title(movie_div):
     expected = "Angel Heart"
-    assert mva.get_title(match_obj_a) == expected
+    assert mva.get_title(movie_div) == expected
 
 
-def test_get_year(match_obj_a):
+def test_get_year(movie_div):
     expected = "1987"
-    assert mva.get_year(match_obj_a) == expected
+    assert mva.get_year(movie_div) == expected
 
 
-def test_get_category(match_obj_a):
+def test_get_category(movie_div):
     expected = "Horror"
-    assert mva.get_category(match_obj_a) == expected
+    assert mva.get_category(movie_div) == expected
 
 
-def test_get_rating(match_obj_a):
+def test_get_rating(movie_div):
     expected = "7.3"
-    assert mva.get_rating(match_obj_a) == expected
+    assert mva.get_rating(movie_div) == expected
 
 
-def test_get_download(match_obj_a):
+def test_get_download(movie_div):
     expected = "/download/9994"
-    assert mva.get_rating(match_obj_a) == expected
+    assert mva.get_download(movie_div) == expected
 
-# def test_get_movie_details(match_list):
-#     expected = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
 
-#     actual = mva.get_movie_details(match_list[0])
-#     assert actual == expected
+def test_get_movie_details(movie_div):
+    expected = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
+
+    actual = mva.get_movie_details(movie_div)
+    assert actual == expected
 
 
 @pytest.fixture
@@ -82,9 +83,9 @@ def html_stub_b():
 
 
 @pytest.fixture
-def match_obj_a(html_stub_a):
-    matches = mva.find_movies(html_stub_a)
-    return matches[0]
+def movie_div(html_stub_a):
+    divs = mva.find_movies(html_stub_a)
+    return divs[0]
 
 
 @pytest.fixture

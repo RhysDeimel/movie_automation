@@ -29,6 +29,10 @@ The.Last.Laugh.2016.WEBRip.x264-RARBG
 They.Shoot.Horses.Dont.They.1969.1080p.BluRay.H264.AAC-RARBG
 """
 
+###########################
+# Scraper tests
+###########################
+
 
 def test_find_movies(html_stub_a):
     """
@@ -68,6 +72,24 @@ def test_get_movie_details(movie_div):
 
     actual = mva.get_movie_details(movie_div)
     assert actual == expected
+
+
+###########################
+# DB tests
+###########################
+
+def test_movie_in_DB_when_not_in_DB():
+    movie = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
+    assert mva.movie_in_DB(movie) is False
+
+
+def test_movie_in_DB_when_in_DB():
+    assert False
+
+
+###########################
+# Fixtures
+###########################
 
 
 @pytest.fixture

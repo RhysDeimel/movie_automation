@@ -86,8 +86,3 @@ def html_stub_b():
 def movie_div(html_stub_a):
     divs = mva.find_movies(html_stub_a)
     return divs[0]
-
-
-@pytest.fixture
-def match_list():
-    pass

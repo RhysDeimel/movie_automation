@@ -1,5 +1,7 @@
 import pytest
 import movie_automation as mva
+import sqlite3
+import os
 
 test_names = """
 2.22.2017.1080p.BluRay.H264.AAC-RARBG
@@ -80,11 +82,13 @@ def test_get_movie_details(movie_div):
 
 def test_movie_in_DB_when_not_in_DB():
     movie = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
-    assert mva.movie_in_DB(movie) is False
+    assert mva.movie_in_DB(movie, 'test.db') is False
 
 
-def test_movie_in_DB_when_in_DB():
-    assert False
+def test_movie_in_DB_when_in_DB(test_db):
+    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
+    # need to write an entry into the DB
+    assert mva.movie_in_DB(movie, 'test.db') is True
 
 
 ###########################
@@ -99,12 +103,22 @@ def html_stub_a():
 
 
 @pytest.fixture
-def html_stub_b():
-    with open("tests/Page2.html") as f:
-        return f.read()
-
-
-@pytest.fixture
 def movie_div(html_stub_a):
     divs = mva.find_movies(html_stub_a)
     return divs[0]
+
+
+@pytest.fixture(scope="function")
+def test_db():
+    # make the DB
+    conn = sqlite3.connect('test.db')
+    conn.execute('''CREATE TABLE movies
+             (id integer primary key autoincrement not null, title text, year text, genre text, rating text, download text)''')
+    conn.executescript('''
+        insert into movies (title, year, genre, rating, download)
+        values ("Angel Heart", "1987", "Horror", "7.3", "/download/9994")
+        ''')
+    conn.close()
+    yield # the DB?
+    # destroy the DB
+    os.remove('test.db')

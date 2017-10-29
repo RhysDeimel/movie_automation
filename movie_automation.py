@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import sqlite3
 import fabric
 import re
+import sqlite3
 
 
 def find_movies(html):
@@ -37,7 +38,6 @@ def get_category(movie_div):
 
 
 def get_rating(movie_div):
-    # currently returning "7.3 / 10"
     rating_elem = movie_div.find("h4", class_="rating")
     pattern = re.compile("(\d.\d)|(\d?)")
     re_result = pattern.match(rating_elem.text)
@@ -52,10 +52,6 @@ def get_download(movie_div):
 
 
 def get_movie_details(movie_div):
-    """
-    Given a match obj, will return a tuple of:
-    (title, year, category, rating, download)
-    """
     return (
         get_title(movie_div),
         get_year(movie_div),
@@ -65,6 +61,8 @@ def get_movie_details(movie_div):
     )
 
 
+def movie_in_DB(movie_details):
+    pass
 
 # go to website
 
@@ -88,14 +86,22 @@ def get_movie_details(movie_div):
 #
 # id # title # year # category # rating # started # completed
 
-def html_stub_a():
-    with open("tests/Page1.html") as f:
-        return f.read()
+# def html_stub_a():
+#     with open("tests/Page1.html") as f:
+#         return f.read()
 
 # test = html_stub_a()
 # test = find_movies(test)
 # print(get_rating(test[0]))
+def main():
+    # latest 1080p movies with 7+ rating
+    url = "https://yts.gs/browse-movies/all/1080p/all/7/latest"
+    # subsequent pages
+    # https://yts.gs/browse-movies/all/1080p/all/7/latest?page=2
 
 
-# https://yts.gs/browse-movies/all/1080p/all/7/latest
-# https://yts.gs/browse-movies/all/1080p/all/7/latest?page=2
+
+
+
+if __name__ == "__main__":
+    pass

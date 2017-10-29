@@ -5,7 +5,6 @@ import fabric
 import re
 import sqlite3
 
-
 def find_movies(html):
     """
     Takes an html dump and returns a list of divs that contain the movie entries
@@ -61,8 +60,21 @@ def get_movie_details(movie_div):
     )
 
 
-def movie_in_DB(movie_details):
-    pass
+def movie_in_DB(movie_details, db_filename):
+    with sqlite3.connect(db_filename) as conn:
+        cursor = conn.cursor()
+
+        query = """
+        select stuff from movies
+        where title = ? and year = ?
+        """
+
+        cursor.execute(query (stuff))
+
+        # make a selection from title and year
+        # if result == 0, return False, else True
+
+
 
 # go to website
 

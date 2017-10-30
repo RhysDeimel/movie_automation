@@ -1,3 +1,4 @@
+from bs4 import BeautifulSoup
 import pytest
 import movie_automation as mva
 import sqlite3
@@ -36,13 +37,16 @@ They.Shoot.Horses.Dont.They.1969.1080p.BluRay.H264.AAC-RARBG
 ###########################
 
 
-def test_find_movies(html_stub_a):
+def test_find_movies(html_stub):
     """
     20 movies exist on the page
     """
-    matches = mva.find_movies(html_stub_a)
+    matches = mva.find_movies(html_stub)
     assert len(matches) == 20
 
+
+# TODO - move these to integration testing and replace with unit tests
+# in the style of test_get_rating_10_of_10
 
 def test_get_title(movie_div):
     expected = "Angel Heart"
@@ -59,8 +63,22 @@ def test_get_category(movie_div):
     assert mva.get_category(movie_div) == expected
 
 
-def test_get_rating(movie_div):
+def test_get_rating_decimal(movie_div):
     expected = "7.3"
+    assert mva.get_rating(movie_div) == expected
+
+
+def test_get_rating_10_of_10():
+    html = '<div class="browse-movie-wrap"><h4 class="rating">10 / 10</h4></div>'
+    movie_div = mock_div_parser(html)
+    expected = "10"
+    assert mva.get_rating(movie_div) == expected
+
+
+def test_get_rating_whole_number():
+    html = '<div class="browse-movie-wrap"><h4 class="rating">8 / 10</h4></div>'
+    movie_div = mock_div_parser(html)
+    expected = "8"
     assert mva.get_rating(movie_div) == expected
 
 
@@ -76,35 +94,43 @@ def test_get_movie_details(movie_div):
     assert actual == expected
 
 
+# def test_download_torrent():
+#     assert False
+
 ###########################
 # DB tests
 ###########################
 
-def test_movie_in_DB_when_not_in_DB():
-    movie = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
+
+def test_movie_in_DB_when_not_in_DB(test_db):
+    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
     assert mva.movie_in_DB(movie, 'test.db') is False
 
 
 def test_movie_in_DB_when_in_DB(test_db):
-    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
-    # need to write an entry into the DB
+    movie = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
     assert mva.movie_in_DB(movie, 'test.db') is True
 
 
+# def test_write_DB():
+#     return False
 ###########################
-# Fixtures
+# Fixtures & helpers
 ###########################
 
+def mock_div_parser(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    return soup.find("div", class_="browse-movie-wrap")
 
 @pytest.fixture
-def html_stub_a():
+def html_stub():
     with open("tests/Page1.html") as f:
         return f.read()
 
 
 @pytest.fixture
-def movie_div(html_stub_a):
-    divs = mva.find_movies(html_stub_a)
+def movie_div(html_stub):
+    divs = mva.find_movies(html_stub)
     return divs[0]
 
 
@@ -119,6 +145,6 @@ def test_db():
         values ("Angel Heart", "1987", "Horror", "7.3", "/download/9994")
         ''')
     conn.close()
-    yield # the DB?
+    yield  # the DB?
     # destroy the DB
     os.remove('test.db')

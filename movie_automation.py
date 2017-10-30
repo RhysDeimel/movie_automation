@@ -38,7 +38,8 @@ def get_category(movie_div):
 
 def get_rating(movie_div):
     rating_elem = movie_div.find("h4", class_="rating")
-    pattern = re.compile("(\d.\d)|(\d?)")
+    # match "7.2" from "7.2 / 10"
+    pattern = re.compile("(\d.\d)|(\d+)")
     re_result = pattern.match(rating_elem.text)
     return re_result.group()
 
@@ -46,6 +47,7 @@ def get_rating(movie_div):
 def get_download(movie_div):
     def is_1080p(tag):
         return tag.text == '1080p'
+    # Filters through elements based on above
     download_elem = movie_div.find(is_1080p)
     return download_elem.get('href')
 
@@ -61,20 +63,32 @@ def get_movie_details(movie_div):
 
 
 def movie_in_DB(movie_details, db_filename):
+    """Returns Bool if movie in DB"""
     with sqlite3.connect(db_filename) as conn:
         cursor = conn.cursor()
 
         query = """
-        select stuff from movies
-        where title = ? and year = ?
+        SELECT count(*) FROM movies
+        WHERE title = ? AND year = ?
         """
+        cursor.execute(query, (movie_details[0], movie_details[1]))
 
-        cursor.execute(query (stuff))
+        result = cursor.fetchone()[0]
 
-        # make a selection from title and year
-        # if result == 0, return False, else True
+    return bool(result)
 
 
+def download_torrent(movie_details, dl_dir=""):
+    """Takes a tuple of movie details and writes .torrent to directory"""
+    url = "https://yts.gs" + movie_details[-1]
+    filename = movie_details[0].strip() + ".torrent"
+    r = requests.get(url)
+    with open(dl_dir + filename, 'wb') as file:
+        file.write(r.content)
+
+
+def write_DB(movie_details):
+    pass
 
 # go to website
 

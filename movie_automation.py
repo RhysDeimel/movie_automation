@@ -87,8 +87,12 @@ def download_torrent(movie_details, dl_dir=""):
         file.write(r.content)
 
 
-def write_DB(movie_details):
+def write_DB(movie_details, db_filename):
     pass
+    # with sqlite3.connect(db_filename) as conn:
+    #     pass
+    #
+    # CREATE TABLE IF NOT EXISTS movies (stuff ...)
 
 # go to website
 

@@ -112,8 +112,32 @@ def test_movie_in_DB_when_in_DB(test_db):
     assert mva.movie_in_DB(movie, 'test.db') is True
 
 
-# def test_write_DB():
-#     return False
+def test_write_db_creates_db_if_not_present():
+    assert not os.path.exists('test.db')
+    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
+    mva.write_DB(movie, 'test.db')
+    assert os.path.exists('test.db')
+
+
+def test_write_db_creates_table_and_schema_if_not_present():
+    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
+    mva.write_DB(movie, 'test.db')
+
+    with sqlite3.connect('test.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT name FROM sqlite_master WHERE type='table' AND name='movies'
+            """)
+        result = cursor.fetchone()
+        assert result
+
+
+def test_write_DB_writes_entry(test_db):
+    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
+    mva.write_DB(movie, 'test.db')
+    assert mva.movie_in_DB(movie, 'test.db')
+
+
 ###########################
 # Fixtures & helpers
 ###########################
@@ -121,6 +145,7 @@ def test_movie_in_DB_when_in_DB(test_db):
 def mock_div_parser(html):
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find("div", class_="browse-movie-wrap")
+
 
 @pytest.fixture
 def html_stub():

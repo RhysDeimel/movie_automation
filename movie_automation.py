@@ -113,9 +113,10 @@ def write_DB(movie_details, db_filename):
 #   get category
 #       if not in DB
 #       download .torrent
-#       move .torrent to correct directory
 #       store in DB for use when naming
 
+# SSH into NAS
+# move .torrents to correct directory
 # check completed folder for finished movies
 #   if not empty
 #       get folder & file names

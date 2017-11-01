@@ -117,6 +117,7 @@ def test_write_db_creates_db_if_not_present():
     movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
     mva.write_DB(movie, 'test.db')
     assert os.path.exists('test.db')
+    os.remove('test.db')
 
 
 def test_write_db_creates_table_and_schema_if_not_present():
@@ -129,7 +130,8 @@ def test_write_db_creates_table_and_schema_if_not_present():
             SELECT name FROM sqlite_master WHERE type='table' AND name='movies'
             """)
         result = cursor.fetchone()
-        assert result
+    assert result
+    os.remove('test.db')
 
 
 def test_write_DB_writes_entry(test_db):

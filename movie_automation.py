@@ -5,6 +5,7 @@ import fabric
 import re
 import sqlite3
 
+
 def find_movies(html):
     """
     Takes an html dump and returns a list of divs that contain the movie entries
@@ -88,11 +89,21 @@ def download_torrent(movie_details, dl_dir=""):
 
 
 def write_DB(movie_details, db_filename):
-    pass
-    # with sqlite3.connect(db_filename) as conn:
-    #     pass
-    #
-    # CREATE TABLE IF NOT EXISTS movies (stuff ...)
+    with sqlite3.connect(db_filename) as conn:
+        conn.execute('''CREATE TABLE IF NOT EXISTS movies
+        (id integer primary key autoincrement not null, title text, year text,
+        genre text, rating text, download text)''')
+
+        query = '''INSERT INTO MOVIES (title, year, genre, rating, download)
+        VALUES (?, ?, ?, ?, ?)'''
+
+        conn.execute(query, (
+            movie_details[0],
+            movie_details[1],
+            movie_details[2],
+            movie_details[3],
+            movie_details[4])
+        )
 
 # go to website
 

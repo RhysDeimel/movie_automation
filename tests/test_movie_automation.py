@@ -166,7 +166,8 @@ def test_db():
     # make the DB
     conn = sqlite3.connect('test.db')
     conn.execute('''CREATE TABLE movies
-             (id integer primary key autoincrement not null, title text, year text, genre text, rating text, download text)''')
+             (id integer primary key autoincrement not null, title text,
+              year text, genre text, rating text, download text)''')
     conn.executescript('''
         insert into movies (title, year, genre, rating, download)
         values ("Angel Heart", "1987", "Horror", "7.3", "/download/9994")

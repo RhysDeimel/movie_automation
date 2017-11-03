@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from fabric.api import *
 import pytest
 import movie_automation as mva
 import sqlite3
@@ -141,8 +142,20 @@ def test_write_DB_writes_entry(test_db):
 
 
 ###########################
+# Fabric tests
+##########################
+
+def test_move_torrents_to_NAS_will_move_torrents(mock_NAS):
+    assert False
+
+
+def test_move_torrents_to_NAS_deletes_from_local(mock_NAS):
+    assert False
+
+###########################
 # Fixtures & helpers
 ###########################
+
 
 def mock_div_parser(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -176,3 +189,45 @@ def test_db():
     yield  # the DB?
     # destroy the DB
     os.remove('test.db')
+
+
+@pytest.fixture(scope="function")
+def mock_NAS():
+    # make sure vagrant synology VM is running
+    # https://github.com/sebask/dsm-vagrant-box - set user and pass in
+    # the vagrant file
+
+    # setup fabric env
+    env.hosts = ['root@127.0.0.1:2222']
+    env.password = 'vagrant'
+    env.shell = '/bin/ash -l -c'
+
+    # create - context manager to suppress output
+    with hide('running', 'stdout', 'stderr'):
+        execute(run, 'mkdir -p mkdir /volume1/Shared/torrents')
+        execute(run, 'mkdir /volume1/Shared/movies')
+
+    yield
+
+    # destroy -  context manager to suppress output
+    with hide('running', 'stdout', 'stderr'):
+        execute(run, 'rm -r /volume1/Shared')
+
+
+# need to run pytest -s
+# otherwise fabric breaks things
+# http://lists.idyll.org/pipermail/testing-in-python/2011-December/004616.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+

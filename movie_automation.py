@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
-import fabric
+from fabric.api import env, execute, run, task
 import re
 import sqlite3
 
@@ -104,6 +104,45 @@ def write_DB(movie_details, db_filename):
             movie_details[3],
             movie_details[4])
         )
+
+
+###########################
+# Fabric functions - run with execute()
+###########################
+
+###########################
+# set up env with:
+#
+# from fabric.api import *
+# env.hosts = ['root@127.0.0.1:2222']
+# env.password = 'vagrant'
+# env.shell = '/bin/ash -l -c'
+# execute(run, 'ls -a')
+###########################
+
+def move_torrents_to_NAS():
+    # for all .torrent files in local dir, move them remote dir
+    # fabric put & then fabric.contrib.files.exists to check they were transferred successfully
+    # if moved correctly, delete from local dir
+    pass
+
+
+def rename_finished_downloads():
+    pass
+
+
+def delete_unwanted_files():
+    pass
+
+
+def move_finished_downloads():
+    pass
+
+
+
+
+
+
 
 # go to website
 

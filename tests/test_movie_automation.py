@@ -204,7 +204,7 @@ def mock_NAS():
 
     # create - context manager to suppress output
     with hide('running', 'stdout', 'stderr'):
-        execute(run, 'mkdir -p mkdir /volume1/Shared/torrents')
+        execute(run, 'mkdir -p mkdir /volume1/Shared/torrents/finished_torrents')
         execute(run, 'mkdir /volume1/Shared/movies')
 
     yield

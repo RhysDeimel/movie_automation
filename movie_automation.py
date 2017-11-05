@@ -120,7 +120,7 @@ def write_DB(movie_details, db_filename):
 # execute(run, 'ls -a')
 ###########################
 
-def move_torrents_to_NAS():
+def move_torrents_to_NAS(local_dir, remote_dir):
     # for all .torrent files in local dir, move them remote dir
     # fabric put & then fabric.contrib.files.exists to check they were transferred successfully
     # if moved correctly, delete from local dir

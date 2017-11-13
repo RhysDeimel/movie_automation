@@ -113,18 +113,23 @@ def test_movie_in_DB_when_in_DB(test_db):
     assert mva.movie_in_DB(movie, 'test.db') is True
 
 
-def test_write_db_creates_db_if_not_present():
+def test_init_DB_creates_db():
     assert not os.path.exists('test.db')
-    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
-    mva.write_DB(movie, 'test.db')
+    mva.init_DB(db_filename='test.db')
     assert os.path.exists('test.db')
     os.remove('test.db')
 
 
-def test_write_db_creates_table_and_schema_if_not_present():
-    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
-    mva.write_DB(movie, 'test.db')
+def test_init_DB_can_create_in_different_dir():
+    db_path = os.path.join('tests', 'test.db')
+    assert not os.path.exists(db_path)
+    mva.init_DB('tests', 'test.db')
+    assert os.path.exists(db_path)
+    os.remove(db_path)
 
+
+def test_init_DB_creates_table_and_schema():
+    mva.init_DB(db_filename='test.db')
     with sqlite3.connect('test.db') as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -140,17 +145,6 @@ def test_write_DB_writes_entry(test_db):
     mva.write_DB(movie, 'test.db')
     assert mva.movie_in_DB(movie, 'test.db')
 
-
-###########################
-# Fabric tests
-##########################
-
-def test_move_torrents_to_NAS_will_move_torrents(mock_NAS):
-    assert False
-
-
-def test_move_torrents_to_NAS_deletes_from_local(mock_NAS):
-    assert False
 
 ###########################
 # Fixtures & helpers
@@ -186,48 +180,6 @@ def test_db():
         values ("Angel Heart", "1987", "Horror", "7.3", "/download/9994")
         ''')
     conn.close()
-    yield  # the DB?
+    yield
     # destroy the DB
     os.remove('test.db')
-
-
-@pytest.fixture(scope="function")
-def mock_NAS():
-    # make sure vagrant synology VM is running
-    # https://github.com/sebask/dsm-vagrant-box - set user and pass in
-    # the vagrant file
-
-    # setup fabric env
-    env.hosts = ['root@127.0.0.1:2222']
-    env.password = 'vagrant'
-    env.shell = '/bin/ash -l -c'
-
-    # create - context manager to suppress output
-    with hide('running', 'stdout', 'stderr'):
-        execute(run, 'mkdir -p mkdir /volume1/Shared/torrents/finished_torrents')
-        execute(run, 'mkdir /volume1/Shared/movies')
-
-    yield
-
-    # destroy -  context manager to suppress output
-    with hide('running', 'stdout', 'stderr'):
-        execute(run, 'rm -r /volume1/Shared')
-
-
-# need to run pytest -s
-# otherwise fabric breaks things
-# http://lists.idyll.org/pipermail/testing-in-python/2011-December/004616.html
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -4,6 +4,12 @@ import sqlite3
 from fabric.api import env, execute, run, task
 import re
 import sqlite3
+import os
+
+
+#############################
+# Scraping
+#############################
 
 
 def find_movies(html):
@@ -32,7 +38,6 @@ def get_category(movie_div):
                       "Action", "Western", "Film-Noir", "Documentary", "Musical",
                       "Music", "Fantasy"]
         return tag.text in categories
-    # <h4>Horror</h4>
     category_elem = movie_div.find(in_categories)
     return category_elem.text
 
@@ -63,6 +68,19 @@ def get_movie_details(movie_div):
     )
 
 
+#############################
+# DB functions
+#############################
+
+
+def init_DB(db_dir="", db_filename="movies.db"):
+    db_path = os.path.join(db_dir, db_filename)
+    with sqlite3.connect(db_path) as conn:
+        conn.execute('''CREATE TABLE IF NOT EXISTS movies
+        (id integer primary key autoincrement not null, title text, year text,
+        genre text, rating text, download text)''')
+
+
 def movie_in_DB(movie_details, db_filename):
     """Returns Bool if movie in DB"""
     with sqlite3.connect(db_filename) as conn:
@@ -77,15 +95,6 @@ def movie_in_DB(movie_details, db_filename):
         result = cursor.fetchone()[0]
 
     return bool(result)
-
-
-def download_torrent(movie_details, dl_dir=""):
-    """Takes a tuple of movie details and writes .torrent to directory"""
-    url = "https://yts.gs" + movie_details[-1]
-    filename = movie_details[0].strip() + ".torrent"
-    r = requests.get(url)
-    with open(dl_dir + filename, 'wb') as file:
-        file.write(r.content)
 
 
 def write_DB(movie_details, db_filename):
@@ -106,83 +115,49 @@ def write_DB(movie_details, db_filename):
         )
 
 
-###########################
-# Fabric functions - run with execute()
-###########################
-
-###########################
-# set up env with:
-#
-# from fabric.api import *
-# env.hosts = ['root@127.0.0.1:2222']
-# env.password = 'vagrant'
-# env.shell = '/bin/ash -l -c'
-# execute(run, 'ls -a')
-###########################
-
-def move_torrents_to_NAS(local_dir, remote_dir):
-    # for all .torrent files in local dir, move them remote dir
-    # fabric put & then fabric.contrib.files.exists to check they were transferred successfully
-    # if moved correctly, delete from local dir
-    pass
+#############################
+# NAS functions
+#############################
 
 
-def rename_finished_downloads():
-    pass
+def download_torrent(movie_details, dl_dir=""):
+    """Takes a tuple of movie details and writes .torrent to directory"""
+    url = "https://yts.gs" + movie_details[-1]
+    filename = movie_details[0].strip() + ".torrent"
+    r = requests.get(url)
+    with open(dl_dir + filename, 'wb') as file:
+        file.write(r.content)
 
 
-def delete_unwanted_files():
-    pass
+#############################
+#############################
 
 
-def move_finished_downloads():
-    pass
-
-
-
-
-
-
-
-# go to website
-
-# get listings from the first 5 pages
-#   get title
-#   get year
-#   get category
-#       if not in DB
-#       download .torrent
-#       store in DB for use when naming
-
-# SSH into NAS
-# move .torrents to correct directory
-# check completed folder for finished movies
-#   if not empty
-#       get folder & file names
-#       delete anything that isn't a movie or subtitle file
-#       rename folder and files based on DB cross reference
-#       move to movies folder on the NAS
-
-# table schema?
-#
-# id # title # year # category # rating # started # completed
-
-# def html_stub_a():
-#     with open("tests/Page1.html") as f:
-#         return f.read()
-
-# test = html_stub_a()
-# test = find_movies(test)
-# print(get_rating(test[0]))
 def main():
     # latest 1080p movies with 7+ rating
     url = "https://yts.gs/browse-movies/all/1080p/all/7/latest"
     # subsequent pages
     # https://yts.gs/browse-movies/all/1080p/all/7/latest?page=2
+    r = requests.get(url)
+    r.raise_for_status()
+    movie_divs = find_movies(r.text)
 
+    movies = [get_movie_details(div) for div in movie_divs]
+
+    # log into NAS
+    #
+    # for movie in movies
+    #   check if not in DB
+    #       pass download link to rtorrent
+    #       write movie to DB
+
+    # Check finished download directory
+    #   Rename files based on best match
+    #   Delete unimportant files
+    #   Move to storage dir
 
 
 
 
 if __name__ == "__main__":
-    pass
+    main()

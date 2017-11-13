@@ -150,7 +150,7 @@ def test_write_DB_writes_entry(test_db):
 # Fixtures & helpers
 ###########################
 
-
+# this is also bad
 def mock_div_parser(html):
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find("div", class_="browse-movie-wrap")
@@ -162,6 +162,7 @@ def html_stub():
         return f.read()
 
 
+# this is bad. Make an independent stub
 @pytest.fixture
 def movie_div(html_stub):
     divs = mva.find_movies(html_stub)

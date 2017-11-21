@@ -81,7 +81,7 @@ def init_DB(db_dir="", db_filename="movies.db"):
         genre text, rating text, download text)''')
 
 
-def movie_in_DB(movie_details, db_filename):
+def movie_in_DB(movie_details, db_filename="movies.db"):
     """Returns Bool if movie in DB"""
     with sqlite3.connect(db_filename) as conn:
         cursor = conn.cursor()
@@ -97,7 +97,7 @@ def movie_in_DB(movie_details, db_filename):
     return bool(result)
 
 
-def write_DB(movie_details, db_filename):
+def write_DB(movie_details, db_filename="movies.db"):
     with sqlite3.connect(db_filename) as conn:
         conn.execute('''CREATE TABLE IF NOT EXISTS movies
         (id integer primary key autoincrement not null, title text, year text,
@@ -116,7 +116,7 @@ def write_DB(movie_details, db_filename):
 
 
 #############################
-# NAS functions
+#
 #############################
 
 
@@ -135,21 +135,39 @@ def download_torrent(movie_details, dl_dir=""):
 
 def main():
     # latest 1080p movies with 7+ rating
-    url = "https://yts.gs/browse-movies/all/1080p/all/7/latest"
+    url_stub = "https://yts.gs/browse-movies/all/1080p/all/7/latest"
     # subsequent pages
     # https://yts.gs/browse-movies/all/1080p/all/7/latest?page=2
-    r = requests.get(url)
+    r = requests.get(url_stub)
     r.raise_for_status()
     movie_divs = find_movies(r.text)
 
     movies = [get_movie_details(div) for div in movie_divs]
 
-    # log into NAS
-    #
-    # for movie in movies
+    init_DB()
+
+    for movie in movies:
+        if not movie_in_DB(movie):
+            try:
+                download_torrent(movie)
+                write_DB(movie)
+            except Exception as e:
+                print(e)
+                # call magnet2torrent
+                os.sys.exit()
+
     #   check if not in DB
     #       pass download link to rtorrent
     #       write movie to DB
+
+
+
+    # log into NAS
+    #
+
+    # libtorrent works with python3.4 - currently working on the pi
+
+    
 
     # Check finished download directory
     #   Rename files based on best match

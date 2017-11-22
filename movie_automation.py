@@ -6,6 +6,7 @@ import re
 import sqlite3
 import os
 import subprocess
+import urllib.parse
 
 #############################
 # Scraping
@@ -131,8 +132,8 @@ def download_torrent(movie_details, dl_dir=""):
 
 def catch_magnet(error):
     start = error[0].find("magnet")
-    return error[0][start:-1]
-
+    magnet = error[0][start:-1]
+    return urllib.parse.unquote(magnet)
 
 def download_magnet(magnet, movie_details, dl_dir=""):
     path = os.path.join(dl_dir, movie_details[0] + ".torrent")

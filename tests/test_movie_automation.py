@@ -147,6 +147,15 @@ def test_write_DB_writes_entry(test_db):
 
 
 ###########################
+# download tests
+###########################
+
+def test_catch_magnet():
+    given = ("No connection adapters were found for 'magnet:?xt=urn:btih:f0b681341f8740eaee513ca742350a599d9d811d&dn=archlinux-2017.11.01-x86_64.iso&tr=udp://tracker.archlinux.org:6969&tr=http://tracker.archlinux.org:6969/announce'",)
+    expected = "magnet:?xt=urn:btih:f0b681341f8740eaee513ca742350a599d9d811d&dn=archlinux-2017.11.01-x86_64.iso&tr=udp://tracker.archlinux.org:6969&tr=http://tracker.archlinux.org:6969/announce"
+    assert mva.catch_magnet(given) == expected
+
+###########################
 # Fixtures & helpers
 ###########################
 

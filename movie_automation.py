@@ -129,6 +129,14 @@ def download_torrent(movie_details, dl_dir=""):
         file.write(r.content)
 
 
+def catch_magnet(error):
+    start = error[0].find("magnet")
+    return error[0][start:-1]
+
+def download_magnet(magnet, movie_details, dl_dir=""):
+    pass
+
+
 #############################
 #############################
 
@@ -151,8 +159,17 @@ def main():
             try:
                 download_torrent(movie)
                 write_DB(movie)
-            except Exception as e:
-                print(e)
+            except requests.exceptions.InvalidSchema as e:
+                magnet_link = catch_magnet(e.args)
+                download_magnet(magnet_link)
+                os.sys.exit()
+
+                # ("No connection adapters were found for 'magnet:?xt=urn:btih:f824cc7cc530bb8a7cf90edc81e69cc190af03a7&amp;dn=f824cc7cc530bb8a7cf90edc81e69cc190af03a7&amp;tr=http%3A%2F%2Ftracker.ilibr.org:6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.org%3A80&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337'",)
+
+
+
+
+
                 # call magnet2torrent
                 os.sys.exit()
 

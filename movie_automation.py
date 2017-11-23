@@ -126,7 +126,7 @@ def download_torrent(movie_details, dl_dir=""):
     url = "https://yts.gs" + movie_details[-1]
     filename = movie_details[0].strip() + ".torrent"
     r = requests.get(url)
-    with open(dl_dir + filename, 'wb') as file:
+    with open(dl_dir + filename.replace(" ", "_"), "wb") as file:
         file.write(r.content)
 
 
@@ -135,12 +135,17 @@ def catch_magnet(error):
     magnet = error[0][start:-1]
     return urllib.parse.unquote(magnet)
 
+
 def download_magnet(magnet, movie_details, dl_dir=""):
-    path = os.path.join(dl_dir, movie_details[0] + ".torrent")
     # have libtorrent in 3.4, can't be bothered compiling for 3.6
-    command = subprocess.run(["/usr/bin/python3.4", "magnet2torrent.py", magnet, path])
-    if not command.returncode == 0:
-        raise Exception("Could not download magnet link")
+    # need to implement a timeout for getting magnet links, as some hang when they can't get data
+    # command = subprocess.run(["/usr/bin/python3.4", "magnet2torrent.py", magnet, path])
+    # if not command.returncode == 0:
+    #     raise Exception("Could not download magnet link")
+
+    # writing magnets to file for now
+    with open('magnets.txt', 'a') as f:
+        f.write(magnet + '\n')
 
 
 #############################
@@ -168,10 +173,7 @@ def main():
             except requests.exceptions.InvalidSchema as e:
                 magnet_link = catch_magnet(e.args)
                 download_magnet(magnet_link, movie)
-                print("magnet dl success")
                 write_DB(movie)
-                print("magnet movie written to DB")
-                os.sys.exit()
 
     #   check if not in DB
     #       pass download link to rtorrent

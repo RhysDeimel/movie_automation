@@ -186,7 +186,7 @@ def main():
                 write_DB(movie)
                 print('{} successfully downloaded and entered into DB'.format(movie[0]))
             except requests.exceptions.InvalidSchema as e:
-                print('{} is actually a magnet link, using aria')
+                print('{} is actually a magnet link, using aria'.format(movie[0]))
                 magnet_link = catch_magnet(e.args)
                 if download_magnet(movie, magnet_link):
                     write_DB(movie)

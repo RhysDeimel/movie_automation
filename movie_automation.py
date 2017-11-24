@@ -7,6 +7,7 @@ import sqlite3
 import os
 import subprocess
 import urllib.parse
+import signal
 
 #############################
 # Scraping
@@ -123,6 +124,9 @@ def write_DB(movie_details, db_filename="movies.db"):
 
 def download_torrent(movie_details, dl_dir=""):
     """Takes a tuple of movie details and writes .torrent to directory"""
+
+    # .ag has way less movies than .gs, but uses torrents instead of magnets
+
     url = "https://yts.gs" + movie_details[-1]
     filename = movie_details[0].strip() + ".torrent"
     r = requests.get(url)
@@ -136,25 +140,32 @@ def catch_magnet(error):
     return urllib.parse.unquote(magnet)
 
 
-def download_magnet(magnet, movie_details, dl_dir=""):
-    # have libtorrent in 3.4, can't be bothered compiling for 3.6
-    # need to implement a timeout for getting magnet links, as some hang when they can't get data
-    # command = subprocess.run(["/usr/bin/python3.4", "magnet2torrent.py", magnet, path])
-    # if not command.returncode == 0:
-    #     raise Exception("Could not download magnet link")
+def download_magnet(movie_details, magnet_link, dir='./'):
+    assert os.path.exists(dir)
 
-    # writing magnets to file for now
-    with open('magnets.txt', 'a') as f:
-        f.write(magnet + '\n')
+    try:
+        output = subprocess.check_output([
+            'aria2c', '--bt-metadata-only=true', '--bt-save-metadata=true', '-d {}'.format(dir),
+            magnet_link
+        ], timeout=960)
 
+        return 'download completed' in output.decode()
+
+    except subprocess.TimeoutExpired:
+        return False
+    else:
+        print('Something went wrong trying to download a magnet link')
+        print(movie_details[0])
+        print(magnet_link)
 
 #############################
+#
 #############################
 
 
 def main():
     # latest 1080p movies with 7+ rating
-    url_stub = "https://yts.gs/browse-movies/all/1080p/all/7/latest"
+    url_stub = "https://yts.gs/browse-movies/all/1080p/all/7/latest?page=1"
     # subsequent pages
     # https://yts.gs/browse-movies/all/1080p/all/7/latest?page=2
     r = requests.get(url_stub)
@@ -167,26 +178,21 @@ def main():
 
     for movie in movies:
         if not movie_in_DB(movie):
+
             try:
                 download_torrent(movie)
                 write_DB(movie)
             except requests.exceptions.InvalidSchema as e:
                 magnet_link = catch_magnet(e.args)
-                download_magnet(magnet_link, movie)
-                write_DB(movie)
+                if download_magnet(movie, magnet_link):
+                    write_DB(movie)
 
-    #   check if not in DB
-    #       pass download link to rtorrent
-    #       write movie to DB
+
 
 
 
     # log into NAS
-    #
-
-    # libtorrent works with python3.4 - currently working on the pi
-
-    
+    #   move torrent files to watch directory
 
     # Check finished download directory
     #   Rename files based on best match

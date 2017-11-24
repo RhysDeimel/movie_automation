@@ -24,7 +24,7 @@ def find_movies(html):
 
 def get_title(movie_div):
     title_elem = movie_div.find("a", class_="browse-movie-title")
-    return title_elem.text
+    return title_elem.text.lower()
 
 
 def get_year(movie_div):
@@ -41,7 +41,7 @@ def get_category(movie_div):
                       "Music", "Fantasy"]
         return tag.text in categories
     category_elem = movie_div.find(in_categories)
-    return category_elem.text
+    return category_elem.text.lower()
 
 
 def get_rating(movie_div):
@@ -158,6 +158,7 @@ def download_magnet(movie_details, magnet_link, dir='./'):
         print('Something went wrong trying to download a magnet link')
         print(movie_details[0])
         print(magnet_link)
+
 
 #############################
 #

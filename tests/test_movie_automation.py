@@ -50,7 +50,7 @@ def test_find_movies(html_stub):
 # in the style of test_get_rating_10_of_10
 
 def test_get_title(movie_div):
-    expected = "Angel Heart"
+    expected = "angel heart"
     assert mva.get_title(movie_div) == expected
 
 
@@ -60,7 +60,7 @@ def test_get_year(movie_div):
 
 
 def test_get_category(movie_div):
-    expected = "Horror"
+    expected = "horror"
     assert mva.get_category(movie_div) == expected
 
 
@@ -89,7 +89,7 @@ def test_get_download(movie_div):
 
 
 def test_get_movie_details(movie_div):
-    expected = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
+    expected = ('angel heart', '1987', 'horror', '7.3', '/download/9994')
 
     actual = mva.get_movie_details(movie_div)
     assert actual == expected
@@ -104,12 +104,12 @@ def test_get_movie_details(movie_div):
 
 
 def test_movie_in_DB_when_not_in_DB(test_db):
-    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
+    movie = ('fake movie', '1900', 'musical', '10', '/download/0000')
     assert mva.movie_in_DB(movie, 'test.db') is False
 
 
 def test_movie_in_DB_when_in_DB(test_db):
-    movie = ('Angel Heart', '1987', 'Horror', '7.3', '/download/9994')
+    movie = ('angel heart', '1987', 'horror', '7.3', '/download/9994')
     assert mva.movie_in_DB(movie, 'test.db') is True
 
 
@@ -141,7 +141,7 @@ def test_init_DB_creates_table_and_schema():
 
 
 def test_write_DB_writes_entry(test_db):
-    movie = ('Fake Movie', '1900', 'Musical', '10', '/download/0000')
+    movie = ('fake movie', '1900', 'musical', '10', '/download/0000')
     mva.write_DB(movie, 'test.db')
     assert mva.movie_in_DB(movie, 'test.db')
 
@@ -187,7 +187,7 @@ def test_db():
               year text, genre text, rating text, download text)''')
     conn.executescript('''
         insert into movies (title, year, genre, rating, download)
-        values ("Angel Heart", "1987", "Horror", "7.3", "/download/9994")
+        values ("angel heart", "1987", "horror", "7.3", "/download/9994")
         ''')
     conn.close()
     yield

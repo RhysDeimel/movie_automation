@@ -1,13 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
-from fabric.api import env, execute, run, task
+from fabric.api import env, execute, run, put
 import re
-import sqlite3
 import os
 import subprocess
 import urllib.parse
-import signal
 
 #############################
 # Scraping
@@ -194,7 +192,9 @@ def main():
                     print('"{}" successfully downloaded and entered into DB'.format(movie[0]))
 
 
-
+def move_torrents():
+    env.hosts = ['admin@192.168.1.112']
+    put('*.torrent', '/volume1/Shared/torrents')
 
 
     # log into NAS
@@ -209,5 +209,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-    print("Complete!")
+    # main()
+    # print("Complete!")
+    execute(move_torrents())

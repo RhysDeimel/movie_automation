@@ -152,7 +152,7 @@ def download_magnet(movie_details, magnet_link, dir='./'):
         return 'download completed' in output.decode()
 
     except subprocess.TimeoutExpired:
-        print('Trying to convert magnet link for {} took too long'.format(movie_details[0]))
+        print('Trying to convert magnet link for "{}" took too long'.format(movie_details[0]))
         return False
     else:
         print('Something went wrong trying to download a magnet link')
@@ -181,16 +181,16 @@ def main():
         if not movie_in_DB(movie):
 
             try:
-                print('Downloading {}'.format(movie[0]))
+                print('Downloading "{}"'.format(movie[0]))
                 download_torrent(movie)
                 write_DB(movie)
-                print('{} successfully downloaded and entered into DB'.format(movie[0]))
+                print('"{}" successfully downloaded and entered into DB'.format(movie[0]))
             except requests.exceptions.InvalidSchema as e:
-                print('{} is actually a magnet link, using aria'.format(movie[0]))
+                print('\t"{}" is actually a magnet link, using aria'.format(movie[0]))
                 magnet_link = catch_magnet(e.args)
                 if download_magnet(movie, magnet_link):
                     write_DB(movie)
-                    print('{} successfully downloaded and entered into DB'.format(movie[0]))
+                    print('"{}" successfully downloaded and entered into DB'.format(movie[0]))
 
 
 

@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
-from fabric.api import *
 import pytest
 import movie_automation as mva
 import sqlite3
 import os
+import shutil
+import secrets
 
 test_names = """
 2.22.2017.1080p.BluRay.H264.AAC-RARBG
@@ -34,7 +35,7 @@ They.Shoot.Horses.Dont.They.1969.1080p.BluRay.H264.AAC-RARBG
 """
 
 ###########################
-# Scraper tests
+# Scraping tests
 ###########################
 
 
@@ -147,13 +148,62 @@ def test_write_DB_writes_entry(test_db):
 
 
 ###########################
-# download tests
+# Download tests
 ###########################
+
+# TODO
+# Figure out a sane way to test download_torrent and download_magnet
 
 def test_catch_magnet():
     given = ("No connection adapters were found for 'magnet:?xt=urn:btih:f0b681341f8740eaee513ca742350a599d9d811d&dn=archlinux-2017.11.01-x86_64.iso&tr=udp://tracker.archlinux.org:6969&tr=http://tracker.archlinux.org:6969/announce'",)
     expected = "magnet:?xt=urn:btih:f0b681341f8740eaee513ca742350a599d9d811d&dn=archlinux-2017.11.01-x86_64.iso&tr=udp://tracker.archlinux.org:6969&tr=http://tracker.archlinux.org:6969/announce"
     assert mva.catch_magnet(given) == expected
+
+
+###########################
+# Remote tests
+###########################
+
+def test_move_torrents_will_move_single_file(mock_NAS):
+    # create test file
+    open('this_is_a_test.torrent', 'w').close()
+
+    test_info = {
+        'hostname': '127.0.0.1',
+        'username': None,
+        'password': secrets.test_ssh_pass,
+        'torrents': ['this_is_a_test.torrent'],
+        'target_dir': '~/volume1/Shared/torrents',
+    }
+
+    mva.move_torrents(**test_info)
+    assert os.path.exists(mock_NAS + 'volume1/Shared/torrents/this_is_a_test.torrent')
+
+    # remove test file
+    os.remove('this_is_a_test.torrent')
+
+
+def test_move_torrents_will_move_multiple_files(mock_NAS):
+    file_list = ['file1.torrent', 'file2.torrent', 'file3.torrent']
+    for file in file_list:
+        open(file, 'w').close()
+
+    test_info = {
+        'hostname': '127.0.0.1',
+        'username': None,
+        'password': secrets.test_ssh_pass,
+        'torrents': file_list,
+        'target_dir': '~/volume1/Shared/torrents',
+    }
+
+    mva.move_torrents(**test_info)
+
+    for file in file_list:
+        assert file in os.listdir(mock_NAS + 'volume1/Shared/torrents/')
+        # remove test file
+        os.remove(file)
+
+
 
 ###########################
 # Fixtures & helpers
@@ -193,3 +243,16 @@ def test_db():
     yield
     # destroy the DB
     os.remove('test.db')
+
+
+@pytest.fixture(scope="function")
+def mock_NAS():
+    # setup
+    user = os.path.expanduser("~/")
+    os.makedirs(user + "volume1/Shared/torrents/finished_torrents", exist_ok=True)
+    os.makedirs(user + "volume1/Shared/movies", exist_ok=True)
+
+    yield user
+
+    # teardown
+    shutil.rmtree(user + "/volume1/")

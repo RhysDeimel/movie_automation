@@ -1,11 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
-from fabric.api import env, execute, run, put
 import re
 import os
 import subprocess
 import urllib.parse
+import paramiko
+import scp
 
 #############################
 # Scraping
@@ -103,7 +104,7 @@ def write_DB(movie_details, db_filename="movies.db"):
         (id integer primary key autoincrement not null, title text, year text,
         genre text, rating text, download text)''')
 
-        query = '''INSERT INTO MOVIES (title, year, genre, rating, download)
+        query = '''INSERT INTO movies (title, year, genre, rating, download)
         VALUES (?, ?, ?, ?, ?)'''
 
         conn.execute(query, (
@@ -116,7 +117,7 @@ def write_DB(movie_details, db_filename="movies.db"):
 
 
 #############################
-#
+# Download functions
 #############################
 
 
@@ -159,9 +160,44 @@ def download_magnet(movie_details, magnet_link, dir='./'):
 
 
 #############################
-#
+# Remote Stuff
 #############################
 
+def move_torrents(hostname, username, password, torrents, target_dir='/volume1/Shared/torrents'):
+    """Given a list of files, will move them to remote using scp"""
+
+    with paramiko.SSHClient() as client:
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(hostname=hostname, username=username, password=password)
+
+        for torrent in torrents:
+            with scp.SCPClient(client.get_transport()) as scp_session:
+                scp_session.put(torrent, target_dir)
+
+
+def get_finished():
+    # returns a list of folders
+    pass
+
+
+def delete_unwanted():
+    # deletes anything that isn't a movie file or a sub
+    pass
+
+
+def rename_finished():
+    # renames based on what is in the DB
+    pass
+
+
+def move_finished():
+    # moves to correct dir
+    pass
+
+
+#############################
+#
+#############################
 
 def main():
     # latest 1080p movies with 7+ rating
@@ -176,6 +212,7 @@ def main():
 
     init_DB()
 
+    # get torrents
     for movie in movies:
         if not movie_in_DB(movie):
 
@@ -191,24 +228,11 @@ def main():
                     write_DB(movie)
                     print('"{}" successfully downloaded and entered into DB'.format(movie[0]))
 
-
-def move_torrents():
-    env.hosts = ['admin@192.168.1.112']
-    put('*.torrent', '/volume1/Shared/torrents')
-
-
-    # log into NAS
-    #   move torrent files to watch directory
-
-    # Check finished download directory
-    #   Rename files based on best match
-    #   Delete unimportant files
-    #   Move to storage dir
-
-
+     # torrent_files = [file for file in os.listdir() if file.endswith('.torrent')]
 
 
 if __name__ == "__main__":
+    # pass
     # main()
     # print("Complete!")
-    execute(move_torrents())
+    pass

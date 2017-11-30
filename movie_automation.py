@@ -163,6 +163,8 @@ def download_magnet(movie_details, magnet_link, dir='./'):
 # Remote Stuff
 #############################
 
+# make this stuff into a class so I'm not creating a new ssh connection each time
+
 def move_torrents(hostname, username, password, torrents, target_dir='/volume1/Shared/torrents'):
     """Given a list of files, will move them to remote using scp"""
 
@@ -175,9 +177,17 @@ def move_torrents(hostname, username, password, torrents, target_dir='/volume1/S
                 scp_session.put(torrent, target_dir)
 
 
-def get_finished():
+def get_finished(hostname, username, password, target_dir='/volume1/Shared/torrents/finished_torrents'):
     # returns a list of folders
-    pass
+    with paramiko.SSHClient() as client:
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(hostname=hostname, username=username, password=password)
+
+        command = "ls {}".format(target_dir)
+        stdin, stdout, stderr = client.exec_command(command)
+
+        # strip newline
+        return [item.strip('\n') for item in stdout.readlines()]
 
 
 def delete_unwanted():

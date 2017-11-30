@@ -203,8 +203,22 @@ def test_move_torrents_will_move_multiple_files(mock_NAS):
         # remove test file
         os.remove(file)
 
-def test_get_finished_will_return_a_list_of_finished_folders(mock_NAS):
-    assert False
+
+def test_get_finished_will_return_a_list_of_finished_names(mock_NAS):
+    expected = ["This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG",
+                "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG",
+                "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG"]
+
+    test_info = {
+        'hostname': '127.0.0.1',
+        'username': None,
+        'password': secrets.test_ssh_pass,
+        'target_dir': '~/volume1/Shared/torrents/finished_torrents',
+    }
+
+    returned = mva.get_finished(**test_info)
+    assert set(returned) == set(expected)
+
 
 ###########################
 # Fixtures & helpers
@@ -260,12 +274,12 @@ def mock_NAS():
     open(finished_dir + "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/RARBG.txt", 'w').close()
     open(finished_dir + "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/Subs/2_Eng.srt", 'w').close()
 
-    os.makedirs(user + "/volume1/Shared/torrents/finished_torrents/Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Subs", exist_ok=True)
+    os.makedirs(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Subs", exist_ok=True)
     open(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG.avi", 'w').close()
     open(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/RARBG.txt", 'w').close()
     open(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Subs/2_Eng.srt", 'w').close()
 
-    os.makedirs(user + "/volume1/Shared/torrents/finished_torrents/FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG", exist_ok=True)
+    os.makedirs(finished_dir + "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG", exist_ok=True)
     open(finished_dir + "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG.mkv", 'w').close()
     open(finished_dir + "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/RARBG.txt", 'w').close()
 

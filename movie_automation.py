@@ -163,7 +163,7 @@ def download_magnet(movie_details, magnet_link, dir='./'):
 # Remote Stuff
 #############################
 
-# make this stuff into a class so I'm not creating a new ssh connection each time
+# TODO: make this stuff into a class so I'm not creating a new ssh connection each time
 
 def move_torrents(hostname, username, password, torrents, target_dir='/volume1/Shared/torrents'):
     """Given a list of files, will move them to remote using scp"""
@@ -190,10 +190,17 @@ def get_finished(hostname, username, password, target_dir='/volume1/Shared/torre
         return [item.strip('\n') for item in stdout.readlines()]
 
 
-def delete_unwanted():
+def delete_unwanted(hostname, username, password, target_dir='/volume1/Shared/torrents/finished_torrents', shell='ash'):
     # deletes anything that isn't a movie file or a sub
-    pass
 
+    with paramiko.SSHClient() as client:
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(hostname=hostname, username=username, password=password)
+
+        command = "find {} -type f | grep -Ev '.webm|.mkv|.ogg|.ogv|.avi|.mp4|.m4p|.srt|.idx|.sub' | awk '{{print \"rm -f \" $1}}' | {}".format(target_dir, shell)
+        stdin, stdout, stderr = client.exec_command(command)
+
+        print([item for item in stdout.readlines()])
 
 def rename_finished():
     # renames based on what is in the DB
@@ -238,7 +245,7 @@ def main():
                     write_DB(movie)
                     print('"{}" successfully downloaded and entered into DB'.format(movie[0]))
 
-     # torrent_files = [file for file in os.listdir() if file.endswith('.torrent')]
+    # torrent_files = [file for file in os.listdir() if file.endswith('.torrent')]
 
 
 if __name__ == "__main__":

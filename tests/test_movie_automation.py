@@ -220,6 +220,58 @@ def test_get_finished_will_return_a_list_of_finished_names(mock_NAS):
     assert set(returned) == set(expected)
 
 
+def test_delete_unwanted_will_remove_unneccesary_files(mock_NAS):
+    finished_dir = mock_NAS + "/volume1/Shared/torrents/finished_torrents/"
+
+    # given = ["This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG",
+    #          "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG",
+    #          "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG"]
+
+    expected = ["This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/RARBG.txt",
+                "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/Subs/2_Eng.asdf",
+                "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/RARBG.txt",
+                "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/randomfile.nco",
+                "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/somepic.jpg",
+                "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/RARBG.txt"]
+
+    test_info = {
+        'hostname': '127.0.0.1',
+        'username': None,
+        'password': secrets.test_ssh_pass,
+        'target_dir': '~/volume1/Shared/torrents/finished_torrents',
+        'shell': 'bash',
+    }
+
+    mva.delete_unwanted(**test_info)
+
+    # check files deleted
+    for file in expected:
+        assert not os.path.exists(finished_dir + file)
+
+
+def test_delete_unwanted_keeps_movies_and_subtitles(mock_NAS):
+    finished_dir = mock_NAS + "/volume1/Shared/torrents/finished_torrents/"
+
+    expected = ["This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG.mp4",
+                "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/Subs/2_Eng.srt",
+                "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG.avi",
+                "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Subs/2_Eng.srt",
+                "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG.mkv"]
+
+    test_info = {
+        'hostname': '127.0.0.1',
+        'username': None,
+        'password': secrets.test_ssh_pass,
+        'target_dir': '~/volume1/Shared/torrents/finished_torrents',
+        'shell': 'bash',
+    }
+
+    mva.delete_unwanted(**test_info)
+
+    for file in expected:
+        assert os.path.exists(finished_dir + file)
+
+
 ###########################
 # Fixtures & helpers
 ###########################
@@ -273,14 +325,17 @@ def mock_NAS():
     open(finished_dir + "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG.mp4", 'w').close()
     open(finished_dir + "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/RARBG.txt", 'w').close()
     open(finished_dir + "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/Subs/2_Eng.srt", 'w').close()
+    open(finished_dir + "This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG/Subs/2_Eng.asdf", 'w').close()
 
     os.makedirs(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Subs", exist_ok=True)
     open(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG.avi", 'w').close()
     open(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/RARBG.txt", 'w').close()
+    open(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/randomfile.nco", 'w').close()
     open(finished_dir + "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG/Subs/2_Eng.srt", 'w').close()
 
     os.makedirs(finished_dir + "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG", exist_ok=True)
     open(finished_dir + "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG.mkv", 'w').close()
+    open(finished_dir + "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/somepic.jpg", 'w').close()
     open(finished_dir + "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG/RARBG.txt", 'w').close()
 
 

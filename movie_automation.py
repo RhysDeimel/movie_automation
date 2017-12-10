@@ -197,18 +197,20 @@ def delete_unwanted(hostname, username, password, target_dir='/volume1/Shared/to
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname=hostname, username=username, password=password)
 
-        command = "find {} -type f | grep -Ev '.webm|.mkv|.ogg|.ogv|.avi|.mp4|.m4p|.srt|.idx|.sub' | awk '{{print \"rm -f \" $1}}' | {}".format(target_dir, shell)
+        command = "find {} -type f | grep -Ev '.webm|.mkv|.ogg|.ogv|.avi|.mp4|.m4p|.srt|.idx|.sub' | xargs rm -f ".format(target_dir)
         stdin, stdout, stderr = client.exec_command(command)
 
         print([item for item in stdout.readlines()])
 
-def rename_finished():
-    # renames based on what is in the DB
+
+def match_movie_to_folder():
+    """Given a folder name, will search DB and provide best fit movie"""
     pass
 
 
-def move_finished():
-    # moves to correct dir
+def rename_and_move_finished():
+    # renames based on what is in the DB
+    # renames files first, and then folder (moves at the same time)
     pass
 
 

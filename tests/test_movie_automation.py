@@ -346,6 +346,8 @@ def movie_div(html_stub):
 @pytest.fixture(scope="function")
 def test_db():
 
+# TODO
+#   - bulk insert these
     movies = [("angel heart", "1987", "horror", "7.3", "/download/9994"),
               ("this is a fake movie", "2014", "thriller", "8", "/download/asdf")
               ("yet another fake", "2017", "musical", "9.2", "/download/qwert"),

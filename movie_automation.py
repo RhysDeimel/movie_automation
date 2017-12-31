@@ -12,6 +12,9 @@ import scp
 # Scraping
 #############################
 
+# TODO
+#   - fix tests to add dummy movies in DB
+
 
 def find_movies(html):
     """

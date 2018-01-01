@@ -110,6 +110,7 @@ def test_movie_in_DB_when_not_in_DB(test_db):
 
 
 def test_movie_in_DB_when_in_DB(test_db):
+    assert os.path.exists('test.db')
     movie = ('angel heart', '1987', 'horror', '7.3', '/download/9994')
     assert mva.movie_in_DB(movie, 'test.db') is True
 
@@ -268,56 +269,56 @@ def test_delete_unwanted_keeps_movies_and_subtitles(mock_NAS):
         assert os.path.exists(finished_dir + file)
 
 
-def test_match_movie_to_folder_returns_word_based_titles():
+# def test_match_movie_to_folder_returns_word_based_titles():
 
-    given = ["This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG",
-             "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG",
-             "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG"]
+#     given = ["This.is.a.Fake.Movie.2014.WEBRip.x264-RARBG",
+#              "Yet.Another.Fake.2017.1080p.BluRay.H264.AAC-RARBG",
+#              "FakeMovie.2016.1080p.BluRay.H264.AAC-RARBG"]
 
-    expected = ["This is a Fake Movie (2014)",
-                "Yet Another Fake Movie (2017)",
-                "FakeMovie (2016)"]
+#     expected = ["This is a Fake Movie (2014)",
+#                 "Yet Another Fake Movie (2017)",
+#                 "FakeMovie (2016)"]
 
-    for item in given:
-        assert mva.match_movie_to_folder(item) in expected
-
-
-def test_match_movie_to_folder_returns_numeric_titles():
-
-    given = ["3.33.2017.1080p.BluRay.H264.AAC-RARBG",
-             "24.Meters.Sideways.2017.1080p.BluRay.H264.AAC-RARBG",
-             "Winter.1942.2008.1080p.BluRay.H264.AAC-RARBG"]
-
-    expected = ["3:33 (2017)",
-                "24 Meters Sideways (2017)",
-                "Winter 1942 (2008)"]
-
-    for item in given:
-        assert mva.match_movie_to_folder(item) in expected
+#     for item in given:
+#         assert mva.match_movie_to_folder(item) in expected
 
 
-def test_rename_and_move_will_move_folders(mock_NAS):
-    expected_dir = mock_NAS + "volume1/Shared/movies"
+# def test_match_movie_to_folder_returns_numeric_titles():
 
-    given_folders = os.listdir(expected_dir)
+#     given = ["3.33.2017.1080p.BluRay.H264.AAC-RARBG",
+#              "24.Meters.Sideways.2017.1080p.BluRay.H264.AAC-RARBG",
+#              "Winter.1942.2008.1080p.BluRay.H264.AAC-RARBG"]
 
-    mva.rename_and_move_finished()
+#     expected = ["3:33 (2017)",
+#                 "24 Meters Sideways (2017)",
+#                 "Winter 1942 (2008)"]
 
-    assert len(given_folders) == 3
+#     for item in given:
+#         assert mva.match_movie_to_folder(item) in expected
 
 
-def test_rename_and_move_will_rename_folders_and_files_correctly(mock_NAS):
-    expected_dir = mock_NAS + "volume1/Shared/movies"
+# def test_rename_and_move_will_move_folders(mock_NAS):
+#     expected_dir = mock_NAS + "volume1/Shared/movies"
 
-    expected_folders = ["This is a Fake Movie (2014)",
-                        "Yet Another Fake (2017)",
-                        "FakeMovie (2016)"]
+#     given_folders = os.listdir(expected_dir)
 
-    given_folders = os.listdir(expected_dir)
+#     mva.rename_and_move_finished()
 
-    mva.rename_and_move_finished()
+#     assert len(given_folders) == 3
 
-    assert set(given_folders) == set(expected_folders)
+
+# def test_rename_and_move_will_rename_folders_and_files_correctly(mock_NAS):
+#     expected_dir = mock_NAS + "volume1/Shared/movies"
+
+#     expected_folders = ["This is a Fake Movie (2014)",
+#                         "Yet Another Fake (2017)",
+#                         "FakeMovie (2016)"]
+
+#     given_folders = os.listdir(expected_dir)
+
+#     mva.rename_and_move_finished()
+
+#     assert set(given_folders) == set(expected_folders)
 
 
 ###########################
@@ -346,27 +347,28 @@ def movie_div(html_stub):
 @pytest.fixture(scope="function")
 def test_db():
 
-# TODO
-#   - bulk insert these
-    movies = [("angel heart", "1987", "horror", "7.3", "/download/9994"),
-              ("this is a fake movie", "2014", "thriller", "8", "/download/asdf")
-              ("yet another fake", "2017", "musical", "9.2", "/download/qwert"),
-              ("fakemovie", "2016", "action", "2", "/download/yuiop"),
-              ("3:33", "2017", "horror", "10", "/download/asdf"),
-              ("24 meters sideways", "2017", "6", "/download/asdf"),
-              ("winter 1942", "2008", "9", "/download/asdf")]
+    test_movies = [("angel heart", "1987", "horror", "7.3", "/download/9994"),
+                   ("this is a fake movie", "2014", "thriller", "8", "/download/asdf"),
+                   ("yet another fake", "2017", "musical", "9.2", "/download/qwert"),
+                   ("fakemovie", "2016", "action", "2", "/download/yuiop"),
+                   ("3:33", "2017", "horror", "10", "/download/asdf"),
+                   ("24 meters sideways", "2017", "comedy", "6", "/download/asdf"),
+                   ("winter 1942", "2008", "Animation", "9", "/download/asdf")]
 
-    # make the DB
-    conn = sqlite3.connect('test.db')
-    conn.execute('''CREATE TABLE movies
-             (id integer primary key autoincrement not null, title text,
-              year text, genre text, rating text, download text)''')
-    conn.executescript('''
-        insert into movies (title, year, genre, rating, download)
-        values ("angel heart", "1987", "horror", "7.3", "/download/9994")
-        ''')
-    conn.close()
+    assert not os.path.exists('test.db')
+
+    with sqlite3.connect('test.db') as conn:
+        conn.execute('''CREATE TABLE movies
+        (id integer primary key autoincrement not null, title text, year text,
+        genre text, rating text, download text)''')
+
+        query = '''INSERT INTO movies (title, year, genre, rating, download)
+        VALUES (?, ?, ?, ?, ?)'''
+
+        conn.executemany(query, test_movies)
+
     yield
+
     # destroy the DB
     os.remove('test.db')
 
@@ -401,4 +403,4 @@ def mock_NAS():
     yield user
 
     # teardown
-    # shutil.rmtree(user + "/volume1/")
+    shutil.rmtree(user + "/volume1/")
